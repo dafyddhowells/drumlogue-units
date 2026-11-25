@@ -1,0 +1,31 @@
+name: Build drumlogue unit
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Korg logue SDK
+        run: |
+          git clone --depth 1 https://github.com/korginc/logue-sdk.git sdk
+          cd sdk && git submodule update --init --depth 1
+      - name: Get Korg build kit
+        run: |
+          docker pull xiashj/logue-sdk:latest || (cd sdk/docker && ./build_image.sh)
+      - name: Build units
+        run: |
+          mkdir -p out
+          for cfg in */config.mk; do
+            unit=$(dirname "$cfg")
+            [ "$unit" = "sdk" ] && continue
+            rm -rf "sdk/platform/drumlogue/$unit"
+            cp -r sdk/platform/drumlogue/dummy-synth "sdk/platform/drumlogue/$unit"
+            cp "$unit"/header.c "$unit"/unit.cc "$unit"/synth.h "$unit"/config.mk "sdk/platform/drumlogue/$unit/"
+            (cd sdk && ./docker/run_cmd.sh build "drumlogue/$unit")
+            cp sdk/platform/drumlogue/$unit/*.drmlgunit out/
+          done
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: drumlogue-unit
+          path: out/*.drmlgunit
