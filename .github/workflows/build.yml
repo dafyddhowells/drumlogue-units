@@ -5,13 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Unpack compressed source files
+        run: find . -name '*.gz' -not -path './sdk/*' -exec gunzip -f {} +
       - name: Get Korg logue SDK
         run: |
           git clone --depth 1 https://github.com/korginc/logue-sdk.git sdk
           cd sdk && git submodule update --init --depth 1
       - name: Get Korg build kit
         run: |
-          docker pull xiashj/logue-sdk:latest || (cd sdk/docker && ./build_image.sh)
+          docker pull xiaoshi/logue-sdk:latest || (cd sdk/docker && ./build_image.sh)
       - name: Build units
         run: |
           mkdir -p out
