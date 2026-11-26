@@ -1,5 +1,8 @@
 name: Build NTS-1 unit
-on: [push, workflow_dispatch]
+on:
+  push:
+    paths: ['ms20_nts1/**', 'monologue_nts1/**']
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

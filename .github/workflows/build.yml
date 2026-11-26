@@ -1,5 +1,8 @@
 name: Build drumlogue unit
-on: [push, workflow_dispatch]
+on:
+  push:
+    paths: ['ms20/**', 'monologue/**']
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
