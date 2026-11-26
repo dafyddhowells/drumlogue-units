@@ -17,112 +17,29 @@ jobs:
           python3 - <<'PY'
           import gzip, json, os, urllib.request, urllib.error, time
           from pathlib import Path
-          repo = os.environ['REPO']
           def api(method, path, body=None):
               data = None if body is None else json.dumps(body).encode()
-              req = urllib.request.Request('https://api.github.com/repos/' + repo + path, data=data, method=method, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'})
-              with urllib.request.urlopen(req) as response:
-                  raw = response.read()
-                  return json.loads(raw) if raw else None
+              req = urllib.request.Request('https://api.github.com/repos/' + os.environ['REPO'] + path, data=data, method=method, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'})
+              try:
+                  with urllib.request.urlopen(req) as response:
+                      raw = response.read()
+                      return json.loads(raw) if raw else None
+              except urllib.error.HTTPError as error:
+                  print('GitHub error:', error.code, error.read().decode())
+                  raise
           files = json.loads(gzip.decompress(Path('.synth-upload.json.gz').read_bytes()))
           assert len(files) == 14
           allowed = {'ms20', 'monologue', 'ms20_nts1', 'monologue_nts1'}
           for row in files:
               assert row['path'].split('/')[0] in allowed and '..' not in row['path']
-          drum = '''name: Build drumlogue unit
-          on: [push, workflow_dispatch]
-          permissions:
-            contents: read
-          jobs:
-            build:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v4
-                - name: Get Korg logue SDK
-                  run: |
-                    git clone --depth 1 https://github.com/korginc/logue-sdk.git sdk
-                    cd sdk && git submodule update --init --depth 1
-                - name: Get Korg build kit
-                  run: |
-                    docker pull xiashj/logue-sdk:latest || (cd sdk/docker && ./build_image.sh)
-                - name: Build units
-                  run: |
-                    set -e
-                    mkdir -p out
-                    for cfg in */config.mk; do
-                      unit=$(dirname "$cfg")
-                      [ "$unit" = "sdk" ] && continue
-                      rm -rf "sdk/platform/drumlogue/$unit"
-                      cp -r sdk/platform/drumlogue/dummy-synth "sdk/platform/drumlogue/$unit"
-                      cp "$unit"/header.c "$unit"/unit.cc "$unit"/synth.h "$unit"/config.mk "sdk/platform/drumlogue/$unit/"
-                      (cd sdk && ./docker/run_cmd.sh build "drumlogue/$unit")
-                      cp sdk/platform/drumlogue/$unit/*.drmlgunit out/
-                    done
-                    test -f out/ms20.drmlgunit
-                    test -f out/monologue.drmlgunit
-                    ls -l out
-                - uses: actions/upload-artifact@v4
-                  with:
-                    name: drumlogue-unit
-                    path: out/*.drmlgunit
-                    if-no-files-found: error
-          '''
-          nts = '''name: Build NTS-1 unit
-          on: [push, workflow_dispatch]
-          permissions:
-            contents: read
-          jobs:
-            build:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v4
-                - name: Get Korg logue SDK
-                  run: |
-                    git clone --depth 1 https://github.com/korginc/logue-sdk.git sdk
-                    cd sdk && git submodule update --init --depth 1
-                - name: Get Korg build kit
-                  run: |
-                    docker pull xiashj/logue-sdk:latest || (cd sdk/docker && ./build_image.sh)
-                - name: Build units
-                  run: |
-                    set -e
-                    mkdir -p out
-                    for cfg in */project.mk; do
-                      unit=$(dirname "$cfg")
-                      [ "$unit" = "sdk" ] && continue
-                      rm -rf "sdk/platform/nutekt-digital/$unit"
-                      cp -r sdk/platform/nutekt-digital/dummy-osc "sdk/platform/nutekt-digital/$unit"
-                      cp "$unit"/manifest.json "$unit"/project.mk "sdk/platform/nutekt-digital/$unit/"
-                      for f in "$unit"/*.cpp "$unit"/*.hpp; do
-                        if [ -e "$f" ]; then cp "$f" "sdk/platform/nutekt-digital/$unit/"; fi
-                      done
-                      (cd sdk && ./docker/run_cmd.sh build "nutekt-digital/$unit")
-                      cp sdk/platform/nutekt-digital/$unit/*.ntkdigunit out/
-                    done
-                    test -f out/ms20_nts1.ntkdigunit
-                    test -f out/monologue_nts1.ntkdigunit
-                    ls -l out
-                - uses: actions/upload-artifact@v4
-                  with:
-                    name: nts1-unit
-                    path: out/*.ntkdigunit
-                    if-no-files-found: error
-          '''
-          files += [{'path': '.github/workflows/build.yml', 'content': drum}, {'path': '.github/workflows/build-nts1.yml', 'content': nts}, {'path': 'README.md', 'content': '# korgTools synth units\n\nLatest MS-20 and Monologue-style synths for drumlogue and original NTS-1.\n\nEach device has a separate source folder. GitHub Actions builds both synths together for each device.\n\nDownload drumlogue-unit for ms20.drmlgunit and monologue.drmlgunit, or nts1-unit for ms20_nts1.ntkdigunit and monologue_nts1.ntkdigunit.\n\nBoth drumlogue synths include NOTE (0-127, default 60/C4). MS-20 opens on WIDE PAD; Monologue opens on ACID LINE. The original NTS-1 versions have six live controls; remaining settings are baked in.\n\nInstall drumlogue units through USB storage mode in Units/Synths. Install original NTS-1 units using Korg NTS-1 Librarian. Back up your existing units and start at low volume. These are community-made synths, not Korg-audited recreations.\n'}]
           base = api('GET', '/git/commits/' + os.environ['COMMIT'])
           tree = [{'path': row['path'], 'mode': '100644', 'type': 'blob', 'content': row['content']} for row in files]
-          tree += [{'path': path, 'mode': '100644', 'type': 'blob', 'sha': None} for path in ['ms20/synth.h.gz', '.synth-upload.json.gz', '.github/workflows/upload-synths.yml']]
+          tree += [{'path': path, 'mode': '100644', 'type': 'blob', 'sha': None} for path in ['ms20/synth.h.gz', '.synth-upload.json.gz']]
           new_tree = api('POST', '/git/trees', {'base_tree': base['tree']['sha'], 'tree': tree})
           commit = api('POST', '/git/commits', {'message': 'Latest MS-20 and Monologue for drumlogue and NTS-1; add NOTE controls', 'tree': new_tree['sha'], 'parents': [os.environ['COMMIT']]})
           api('PATCH', '/git/refs/heads/main', {'sha': commit['sha'], 'force': False})
           print('Published tested synth sources:', commit['sha'])
           for workflow in ['build.yml', 'build-nts1.yml']:
-              for attempt in range(6):
-                  try:
-                      api('POST', '/actions/workflows/' + workflow + '/dispatches', {'ref': 'main'})
-                      print('Started', workflow)
-                      break
-                  except urllib.error.HTTPError:
-                      if attempt == 5: raise
-                      time.sleep(5)
+              api('POST', '/actions/workflows/' + workflow + '/dispatches', {'ref': 'main'})
+              print('Started', workflow)
           PY

@@ -1,0 +1,40 @@
+name: Build NTS-1 unit
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Korg logue SDK
+        run: |
+          git clone --depth 1 https://github.com/korginc/logue-sdk.git sdk
+          cd sdk && git submodule update --init --depth 1
+      - name: Get Korg build kit
+        run: |
+          docker pull xiashj/logue-sdk:latest || (cd sdk/docker && ./build_image.sh)
+      - name: Build units
+        run: |
+          set -e
+          mkdir -p out
+          for cfg in */project.mk; do
+            unit=$(dirname "$cfg")
+            [ "$unit" = "sdk" ] && continue
+            rm -rf "sdk/platform/nutekt-digital/$unit"
+            cp -r sdk/platform/nutekt-digital/dummy-osc "sdk/platform/nutekt-digital/$unit"
+            cp "$unit"/manifest.json "$unit"/project.mk "sdk/platform/nutekt-digital/$unit/"
+            for f in "$unit"/*.cpp "$unit"/*.hpp; do
+              if [ -e "$f" ]; then cp "$f" "sdk/platform/nutekt-digital/$unit/"; fi
+            done
+            (cd sdk && ./docker/run_cmd.sh build "nutekt-digital/$unit")
+            cp sdk/platform/nutekt-digital/$unit/*.ntkdigunit out/
+          done
+          test -f out/ms20_nts1.ntkdigunit
+          test -f out/monologue_nts1.ntkdigunit
+          ls -l out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nts1-unit
+          path: out/*.ntkdigunit
+          if-no-files-found: error
