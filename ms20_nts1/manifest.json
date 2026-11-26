@@ -1,0 +1,21 @@
+{
+    "header" :
+    {
+        "platform" : "nutekt-digital",
+        "module" : "osc",
+        "api" : "1.1-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.0-0",
+        "name" : "MS20",
+        "num_param" : 6,
+        "params" : [
+            ["CUTOFF", 0, 100, "%"],
+            ["RESON", 0, 100, "%"],
+            ["ENV", -100, 100, "%"],
+            ["ATTACK", 0, 100, "%"],
+            ["RELEASE", 0, 100, "%"],
+            ["VOLUME", 0, 100, "%"]
+          ]
+    }
+}

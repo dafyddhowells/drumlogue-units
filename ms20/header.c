@@ -16,8 +16,8 @@ const __unit_header unit_header_t unit_header = {
     .num_params = 24,
     .params = {
         // Page 1
-        {0, 100, 0, 55, k_unit_param_type_percent, 0, 0, 0, {"LPF CUT"}},
-        {0, 100, 0, 40, k_unit_param_type_percent, 0, 0, 0, {"LPF PEAK"}},
+        {0, 100, 0, 45, k_unit_param_type_percent, 0, 0, 0, {"LPF CUT"}},
+        {0, 100, 0, 20, k_unit_param_type_percent, 0, 0, 0, {"LPF PEAK"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"HPF CUT"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"HPF PEAK"}},
 
@@ -25,28 +25,28 @@ const __unit_header unit_header_t unit_header = {
         {0, 3, 0, 1, k_unit_param_type_strings, 0, 0, 0, {"VCO1 WAVE"}},
         {0, 3, 0, 1, k_unit_param_type_strings, 0, 0, 0, {"VCO2 WAVE"}},
         {-24, 24, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VCO2 SEMI"}},
-        {-50, 50, 0, 7, k_unit_param_type_none, 0, 0, 0, {"VCO2 FINE"}},
+        {-50, 50, 0, 12, k_unit_param_type_none, 0, 0, 0, {"VCO2 FINE"}},
 
         // Page 3
         {0, 100, 0, 100, k_unit_param_type_percent, 0, 0, 0, {"VCO1 LVL"}},
-        {0, 100, 0, 60, k_unit_param_type_percent, 0, 0, 0, {"VCO2 LVL"}},
+        {0, 100, 0, 90, k_unit_param_type_percent, 0, 0, 0, {"VCO2 LVL"}},
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"RING/NOISE"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"FEEDBACK"}},
 
         // Page 4
-        {0, 100, 0, 2, k_unit_param_type_percent, 0, 0, 0, {"ATTACK"}},
-        {0, 100, 0, 40, k_unit_param_type_percent, 0, 0, 0, {"DECAY"}},
-        {0, 100, 0, 60, k_unit_param_type_percent, 0, 0, 0, {"SUSTAIN"}},
-        {0, 100, 0, 30, k_unit_param_type_percent, 0, 0, 0, {"RELEASE"}},
+        {0, 100, 0, 70, k_unit_param_type_percent, 0, 0, 0, {"ATTACK"}},
+        {0, 100, 0, 70, k_unit_param_type_percent, 0, 0, 0, {"DECAY"}},
+        {0, 100, 0, 80, k_unit_param_type_percent, 0, 0, 0, {"SUSTAIN"}},
+        {0, 100, 0, 75, k_unit_param_type_percent, 0, 0, 0, {"RELEASE"}},
 
         // Page 5
-        {-100, 100, 0, 40, k_unit_param_type_none, 0, 0, 0, {"EG>LPF"}},
+        {-100, 100, 0, 20, k_unit_param_type_none, 0, 0, 0, {"EG>LPF"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"EG>PITCH"}},
-        {0, 100, 0, 30, k_unit_param_type_percent, 0, 0, 0, {"LFO RATE"}},
-        {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"LFO>LPF"}},
+        {0, 100, 0, 15, k_unit_param_type_percent, 0, 0, 0, {"LFO RATE"}},
+        {0, 100, 0, 25, k_unit_param_type_percent, 0, 0, 0, {"LFO>LPF"}},
 
         // Page 6
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"GLIDE"}},
-        {0, 100, 0, 15, k_unit_param_type_percent, 0, 0, 0, {"DRIFT"}},
+        {0, 127, 0, 60, k_unit_param_type_midi_note, 0, 0, 0, {"NOTE"}},
         {0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"KEY TRACK"}},
         {0, 100, 0, 80, k_unit_param_type_percent, 0, 0, 0, {"VOLUME"}}}};
